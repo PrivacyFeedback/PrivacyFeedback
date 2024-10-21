@@ -1,10 +1,12 @@
-"use client"
+"use client";
 
-export default function Both() {
-  console.log("Hello Both")
+export default function Home() {
+  console.log("Hello Both");
   return (
     <div>
-      <h1>dxfcgjhk</h1>
+      <nav>
+        <w3m-button/>
+      </nav>
     </div>
-  )
+  );
 }
