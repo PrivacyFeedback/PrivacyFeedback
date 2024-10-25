@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowRight, Lock, Shield, UserCheck, Zap } from "lucide-react"
+import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
+import { useRouter } from 'next/navigation'
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -22,16 +24,16 @@ const stagger = {
 }
 
 export default function LandingPage() {
+  const router = useRouter()
   const [isConnecting, setIsConnecting] = useState(false)
+  const { address, isConnected, caipAddress, status } = useAppKitAccount()
 
-  const connectWallet = async () => {
-    setIsConnecting(true)
-    // Simulating wallet connection
-    setTimeout(() => {
-      setIsConnecting(false)
-      // Here you would typically redirect to a dashboard or show a success message
-    }, 2000)
-  }
+  useEffect(() => {
+    if (isConnected) {
+      console.log("Wallet connected: ", address, caipAddress)
+      router.push("/front")
+    }
+  }, [isConnected])
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-gray-100">
@@ -75,13 +77,7 @@ export default function LandingPage() {
                 </p>
               </motion.div>
               <motion.div className="space-x-4" variants={fadeIn}>
-                <Button
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                  onClick={connectWallet}
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? 'Connecting...' : 'Connect Wallet to Get Started'}
-                </Button>
+                <w3m-button label="Connect Wallet to Get Started"/>
               </motion.div>
             </div>
           </motion.div>
@@ -206,13 +202,7 @@ export default function LandingPage() {
                 </p>
               </motion.div>
               <motion.div variants={fadeIn}>
-                <Button
-                  className="inline-flex h-9 items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-blue-900 shadow transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                  onClick={connectWallet}
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? 'Connecting...' : 'Connect Wallet'} <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <w3m-button label="Connect Wallet ➡"/>
               </motion.div>
             </div>
           </motion.div>

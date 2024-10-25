@@ -1,8 +1,17 @@
 'use client'
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAppKitAccount, useAppKit } from "@reown/appkit/react";
+import { useRouter } from 'next/navigation'
 
 export default function Front() {
+  const router = useRouter()
+  const { address, isConnected, caipAddress, status } = useAppKitAccount()
   const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    console.log("Connected: ", isConnected, address, caipAddress, status)
+  },[])
+  
   const saveGreeting = ()=>{
     fetch('/api',{
       method:"POST", 
@@ -15,6 +24,7 @@ export default function Front() {
     <div>
       <input value={greeting} onChange={(e)=>setGreeting(e.target.value)}/>
       <button  onClick={saveGreeting}>send my greeting to the server</button>
+      <w3m-button/>
     </div>
   )
 }
