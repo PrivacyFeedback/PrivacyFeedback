@@ -24,6 +24,7 @@ const stagger = {
 }
 
 export default function LandingPage() {
+
   const router = useRouter()
   const [isConnecting, setIsConnecting] = useState(false)
   const { address, isConnected, caipAddress, status } = useAppKitAccount()
@@ -31,7 +32,7 @@ export default function LandingPage() {
   useEffect(() => {
     if (isConnected) {
       console.log("Wallet connected: ", address, caipAddress)
-      router.push("/front")
+      router.push("/dashboard")
     }
   }, [isConnected])
 
