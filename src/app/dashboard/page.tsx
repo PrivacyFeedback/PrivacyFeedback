@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Lock, Shield, UserCheck, Zap, PlusCircle, DollarSign, BarChart2, MessageSquare, Gift, ChevronRight, Activity, Star, ThumbsUp, ThumbsDown, ChevronLeft, ChevronDown, Filter } from "lucide-react"
+
+interface Service {
+  id: number
+  name: string
+  interactions: number
+  feedbacks: number
+  rating: number
+}
 
 const mockServices = [
   { id: 1, name: 'Service A', interactions: 100, feedbacks: 50, rating: 4.5 },
@@ -72,8 +80,8 @@ const mockAnalytics = [
 ]
 
 export default function Dashboard() {
-  const [services, setServices] = useState(mockServices)
-  const [selectedService, setSelectedService] = useState(null)
+  const [services, setServices] = useState<Service[]>(mockServices)
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [isAddingService, setIsAddingService] = useState(false)
   const { toast } = useToast()
 
@@ -101,33 +109,38 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-black text-gray-100">
-      <header className="px-6 py-4 bg-gray-800 border-b border-gray-700">
+    <div className="flex flex-col min-h-screen bg-white text-black">
+      <header className="px-6 py-4 bg-black text-white">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-400">PrivateFeedbackSDK Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <svg className="w-10 h-10" viewBox="0 0 864 528" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M477.902 320.988C471.752 323.09 466.453 326.446 460.017 326.583C453.919 326.712 448.562 325.186 443.744 321.421C427.204 308.496 410.717 295.5 394.001 282.806C385.68 276.488 382.527 268.246 383.83 258.3C386.571 237.386 389.7 216.523 392.561 195.624C393.826 186.38 398.655 179.956 407.207 176.397C426.886 168.207 446.603 160.108 466.296 151.95C475.406 148.177 483.893 149.239 491.685 155.249C508.564 168.267 525.356 181.401 542.275 194.367C552.007 201.826 552.544 211.948 551.044 222.788C548.472 241.38 545.758 259.955 543.403 278.575C542.073 289.094 537.098 296.642 527.235 300.722C510.926 307.468 494.585 314.14 477.902 320.988ZM480.263 305.707C487.126 302.854 493.988 300.001 500.87 297.141C499.966 294.864 498.393 294.104 497.114 293.109C476.867 277.373 456.16 262.188 436.524 245.725C427.798 238.411 420.775 237.382 410.434 242.107C401.94 245.988 396.894 249.781 396.85 259.779C396.827 264.994 397.562 268.813 401.596 271.943C418.437 285.006 435.269 298.083 452.114 311.142C455.391 313.682 458.949 314.368 462.891 312.736C468.428 310.445 473.999 308.236 480.263 305.707ZM523.711 196.816C516.633 191.417 509.555 186.017 501.756 180.068C500.673 188.18 499.731 195.205 498.798 202.23C495.913 223.95 493.091 245.679 490.077 267.38C489.691 270.158 490.621 271.657 492.669 273.201C498.646 277.708 504.495 282.385 510.406 286.981C517.872 292.787 528.21 289.232 529.656 279.871C532.923 258.718 535.669 237.485 538.666 216.29C539.395 211.134 537.635 207.273 533.318 204.321C530.165 202.166 527.272 199.63 523.711 196.816ZM440.649 216.038C454.504 210.323 468.338 204.554 482.234 198.939C484.848 197.883 486.306 196.392 486.647 193.553C487.459 186.791 488.406 180.045 489.365 173.302C489.563 171.91 489.487 170.758 488.546 169.588C483.874 163.778 477.163 161.899 470.218 164.726C451.245 172.447 432.312 180.266 413.329 187.963C408.493 189.923 405.984 193.418 405.344 198.481C404.782 202.928 403.863 207.348 403.595 211.81C403.21 218.214 401.181 224.471 401.577 232.042C414.817 226.625 427.381 221.486 440.649 216.038ZM479.912 239.695C481.083 231.083 482.254 222.471 483.582 212.704C468.436 218.903 454.445 224.629 439.313 230.821C451.992 241.396 463.894 250.645 477.027 260.376C478.07 252.93 478.935 246.755 479.912 239.695Z" fill="white"/>
+            </svg>
+            <h1 className="text-2xl font-bold">PrivateFeedback Dashboard</h1>
+          </div>
           <nav className="space-x-4">
-            <Button variant="ghost" className="text-gray-300 hover:text-blue-400">Services</Button>
-            <Button variant="ghost" className="text-gray-300 hover:text-blue-400">Analytics</Button>
+            <Button variant="ghost" className="text-white hover:text-gray-300">Services</Button>
+            <Button variant="ghost" className="text-white hover:text-gray-300">Analytics</Button>
+            <Button variant="ghost" className="text-white hover:text-gray-300">Settings</Button>
           </nav>
-        <w3m-button/>
         </div>
       </header>
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 bg-gray-50">
         <div className="container mx-auto">
           {!selectedService ? (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-semibold text-blue-400">Your Services</h2>
+                <h2 className="text-3xl font-semibold text-black">Your Services</h2>
                 <Dialog open={isAddingService} onOpenChange={setIsAddingService}>
                   <DialogTrigger asChild>
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button className="bg-black hover:bg-gray-800 text-white">
                       <PlusCircle className="mr-2 h-4 w-4" /> Add Service
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] bg-gray-800 text-gray-100 border border-gray-700">
+                  <DialogContent className="sm:max-w-[425px] bg-white text-black">
                     <DialogHeader>
-                      <DialogTitle className="text-blue-400">Add New Service</DialogTitle>
-                      <DialogDescription className="text-gray-400">Enter the details for your new service.</DialogDescription>
+                      <DialogTitle className="text-black">Add New Service</DialogTitle>
+                      <DialogDescription className="text-gray-600">Enter the details for your new service.</DialogDescription>
                     </DialogHeader>
                     <AddServiceForm onSubmit={handleAddService} />
                   </DialogContent>
@@ -135,46 +148,46 @@ export default function Dashboard() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {services.map((service) => (
-                  <Card key={service.id} className="bg-gray-800 border-gray-700 hover:bg-gray-750 transition-colors">
+                  <Card key={service.id} className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="text-blue-400">{service.name}</CardTitle>
-                      <CardDescription className="text-gray-400">
+                      <CardTitle className="text-black">{service.name}</CardTitle>
+                      <CardDescription className="text-gray-600">
                         Rating: {service.rating.toFixed(1)} / 5
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex justify-between text-gray-300 mb-4">
+                      <div className="flex justify-between text-gray-600 mb-4">
                         <div className="flex items-center">
-                          <Activity className="h-4 w-4 mr-2 text-green-400" />
+                          <Activity className="h-4 w-4 mr-2 text-green-600" />
                           <span>{service.interactions} Interactions</span>
                         </div>
                         <div className="flex items-center">
-                          <MessageSquare className="h-4 w-4 mr-2 text-yellow-400" />
+                          <MessageSquare className="h-4 w-4 mr-2 text-yellow-600" />
                           <span>{service.feedbacks} Feedbacks</span>
                         </div>
                       </div>
-                      <Button onClick={() => setSelectedService(service)} variant="outline" className="w-full text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-gray-900">
+                      <Button onClick={() => setSelectedService(service)} variant="outline" className="w-full text-black border-black hover:bg-black hover:text-white">
                         View Details <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="bg-white border-gray-200">
                 <CardHeader>
-                  <CardTitle className="text-blue-400">Overall Analytics</CardTitle>
+                  <CardTitle className="text-black">Overall Analytics</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={mockAnalytics}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="name" stroke="#9CA3AF" />
-                        <YAxis stroke="#9CA3AF" />
-                        <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: 'none' }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="name" stroke="#4B5563" />
+                        <YAxis stroke="#4B5563" />
+                        <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
                         <Legend />
-                        <Bar dataKey="interactions" fill="#3B82F6" />
-                        <Bar dataKey="feedbacks" fill="#10B981" />
+                        <Bar dataKey="interactions" fill="#000000" />
+                        <Bar dataKey="feedbacks" fill="#4B5563" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -218,25 +231,25 @@ function AddServiceForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="name" className="text-gray-200">Service Name</Label>
-        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="bg-gray-700 text-gray-100 border-gray-600" />
+        <Label htmlFor="name" className="text-black">Service Name</Label>
+        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="bg-white text-black border-gray-300" />
       </div>
       <div>
-        <Label htmlFor="description" className="text-gray-200">Description</Label>
-        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required className="bg-gray-700 text-gray-100 border-gray-600" />
+        <Label htmlFor="description" className="text-black">Description</Label>
+        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required className="bg-white text-black border-gray-300" />
       </div>
       <div>
-        <Label className="text-gray-200">Feedback Questions</Label>
+        <Label className="text-black">Feedback Questions</Label>
         {feedbackQuestions.map((q, index) => (
           <div key={index} className="flex space-x-2 mt-2">
             <Select
               value={q.type}
               onValueChange={(value) => handleQuestionChange(index, 'type', value)}
             >
-              <SelectTrigger className="w-[180px] bg-gray-700 text-gray-100 border-gray-600">
+              <SelectTrigger className="w-[180px] bg-white text-black border-gray-300">
                 <SelectValue placeholder="Question Type" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-700 text-gray-100 border-gray-600">
+              <SelectContent>
                 <SelectItem value="rating">Rating (0-5)</SelectItem>
                 <SelectItem value="text">Short Answer</SelectItem>
                 <SelectItem value="photo">Photo Upload</SelectItem>
@@ -247,15 +260,15 @@ function AddServiceForm({ onSubmit }) {
               value={q.question}
               onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
               required
-              className="bg-gray-700 text-gray-100 border-gray-600"
+              className="bg-white text-black border-gray-300"
             />
           </div>
         ))}
-        <Button type="button" onClick={handleAddQuestion} variant="outline" className="mt-2 text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-gray-900">
+        <Button type="button" onClick={handleAddQuestion} variant="outline" className="mt-2 text-black border-black hover:bg-black hover:text-white">
           Add Question
         </Button>
       </div>
-      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Add Service</Button>
+      <Button type="submit" className="bg-black hover:bg-gray-800 text-white">Add Service</Button>
     </form>
   )
 }
@@ -282,7 +295,7 @@ function ServiceDetails({ service, feedbacks, onBack, onReward }) {
   })
 
   const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage)
-  const  paginatedFeedbacks = filteredFeedbacks.slice(
+  const paginatedFeedbacks = filteredFeedbacks.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
@@ -292,17 +305,17 @@ function ServiceDetails({ service, feedbacks, onBack, onReward }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-semibold text-blue-400">{service.name}</h2>
-        <Button onClick={onBack} variant="outline" className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-gray-900">
+        <h2 className="text-3xl font-semibold text-black">{service.name}</h2>
+        <Button onClick={onBack} variant="outline" className="text-black border-black hover:bg-black hover:text-white">
           <ChevronLeft className="mr-2 h-4 w-4" /> Back to Services
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle className="text-blue-400">Service Statistics</CardTitle>
+            <CardTitle className="text-black">Service Statistics</CardTitle>
           </CardHeader>
-          <CardContent className="text-gray-300">
+          <CardContent className="text-gray-600">
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Total Interactions:</span>
@@ -322,31 +335,31 @@ function ServiceDetails({ service, feedbacks, onBack, onReward }) {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800 border-gray-700 md:col-span-2">
+        <Card className="bg-white border-gray-200 md:col-span-2">
           <CardHeader>
-            <CardTitle className="text-blue-400">Feedback Overview</CardTitle>
+            <CardTitle className="text-black">Feedback Overview</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center space-x-2">
-                <Label htmlFor="sort" className="text-gray-300">Sort by:</Label>
+                <Label htmlFor="sort" className="text-gray-600">Sort by:</Label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger id="sort" className="w-[180px] bg-gray-700 text-gray-100 border-gray-600">
+                  <SelectTrigger id="sort" className="w-[180px] bg-white text-black border-gray-300">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-700 text-gray-100 border-gray-600">
+                  <SelectContent>
                     <SelectItem value="date">Date</SelectItem>
                     <SelectItem value="rating">Rating</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex items-center space-x-2">
-                <Label htmlFor="filter" className="text-gray-300">Filter by rating:</Label>
+                <Label htmlFor="filter" className="text-gray-600">Filter by rating:</Label>
                 <Select value={filterRating} onValueChange={setFilterRating}>
-                  <SelectTrigger id="filter" className="w-[180px] bg-gray-700 text-gray-100 border-gray-600">
+                  <SelectTrigger id="filter" className="w-[180px] bg-white text-black border-gray-300">
                     <SelectValue placeholder="Filter by rating" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-700 text-gray-100 border-gray-600">
+                  <SelectContent>
                     <SelectItem value="all">All Ratings</SelectItem>
                     <SelectItem value="5">5 Stars</SelectItem>
                     <SelectItem value="4">4 Stars</SelectItem>
@@ -357,12 +370,12 @@ function ServiceDetails({ service, feedbacks, onBack, onReward }) {
                 </Select>
               </div>
               <div className="flex items-center space-x-2">
-                <Label htmlFor="viewMode" className="text-gray-300">View Mode:</Label>
+                <Label htmlFor="viewMode" className="text-gray-600">View Mode:</Label>
                 <Select value={viewMode} onValueChange={setViewMode}>
-                  <SelectTrigger id="viewMode" className="w-[180px] bg-gray-700 text-gray-100 border-gray-600">
+                  <SelectTrigger id="viewMode" className="w-[180px] bg-white text-black border-gray-300">
                     <SelectValue placeholder="View Mode" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-700 text-gray-100 border-gray-600">
+                  <SelectContent>
                     <SelectItem value="individual">Individual Feedbacks</SelectItem>
                     <SelectItem value="aggregated">Aggregated View</SelectItem>
                   </SelectContent>
@@ -383,21 +396,21 @@ function ServiceDetails({ service, feedbacks, onBack, onReward }) {
           </CardContent>
         </Card>
       </div>
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-blue-400">Service Analytics</CardTitle>
+          <CardTitle className="text-black">Service Analytics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockAnalytics}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="name" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
-                <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: 'none' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis dataKey="name" stroke="#4B5563" />
+                <YAxis stroke="#4B5563" />
+                <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB' }} />
                 <Legend />
-                <Bar dataKey="interactions" fill="#3B82F6" />
-                <Bar dataKey="feedbacks" fill="#10B981" />
+                <Bar dataKey="interactions" fill="#000000" />
+                <Bar dataKey="feedbacks" fill="#4B5563" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -411,37 +424,37 @@ function IndividualFeedbackView({ feedbacks, onReward, currentPage, totalPages, 
   return (
     <div className="space-y-4">
       {feedbacks.map((feedback) => (
-        <div key={feedback.id} className="bg-gray-700 rounded-lg p-4">
+        <div key={feedback.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
           <div className="flex justify-between items-start mb-2">
-            <span className="text-sm text-gray-400">Feedback ID: {feedback.id}</span>
-            <span className="text-sm text-gray-400">{feedback.date}</span>
+            <span className="text-sm text-gray-600">Feedback ID: {feedback.id}</span>
+            <span className="text-sm text-gray-600">{feedback.date}</span>
           </div>
           <div className="mb-4">
-            <span className="text-lg font-semibold text-blue-400 flex items-center">
+            <span className="text-lg font-semibold text-black flex items-center">
               Overall Rating: {feedback.overallRating}
               <Star className="h-5 w-5 ml-1 text-yellow-400 fill-current" />
             </span>
           </div>
           <div className="space-y-3">
             {feedback.responses.map((response, index) => (
-              <div key={index} className="bg-gray-800 rounded p-3">
-                <p className="text-gray-300 font-medium mb-1">{response.question}</p>
+              <div key={index} className="bg-white rounded p-3 border border-gray-200">
+                <p className="text-gray-800 font-medium mb-1">{response.question}</p>
                 <div className="flex justify-between items-center">
-                  <p className="text-gray-400">{response.answer}</p>
+                  <p className="text-gray-600">{response.answer}</p>
                   <div className="flex items-center">
                     {response.rating >= 4 ? (
-                      <ThumbsUp className="h-4 w-4 text-green-400 mr-1" />
+                      <ThumbsUp className="h-4 w-4 text-green-600 mr-1" />
                     ) : response.rating <= 2 ? (
-                      <ThumbsDown className="h-4 w-4 text-red-400 mr-1" />
+                      <ThumbsDown className="h-4 w-4 text-red-600 mr-1" />
                     ) : null}
-                    <span className="text-sm font-semibold text-gray-300">{response.rating}/5</span>
+                    <span className="text-sm font-semibold text-gray-600">{response.rating}/5</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-4 flex justify-end">
-            <Button onClick={() => onReward(feedback.id)} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button onClick={() => onReward(feedback.id)} size="sm" className="bg-black hover:bg-gray-800 text-white">
               <Gift className="mr-2 h-4 w-4" /> Reward
             </Button>
           </div>
@@ -452,18 +465,18 @@ function IndividualFeedbackView({ feedbacks, onReward, currentPage, totalPages, 
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
           variant="outline"
-          className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-gray-900"
+          className="text-black border-black hover:bg-black hover:text-white"
         >
           Previous
         </Button>
-        <span className="text-gray-300">
+        <span className="text-gray-600">
           Page {currentPage} of {totalPages}
         </span>
         <Button
           onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
           variant="outline"
-          className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-gray-900"
+          className="text-black border-black hover:bg-black hover:text-white"
         >
           Next
         </Button>
@@ -483,22 +496,22 @@ function AggregatedFeedbackView({ feedbacks }) {
   return (
     <div className="space-y-6">
       {aggregatedResponses.map((aggregatedResponse, index) => (
-        <Card key={index} className="bg-gray-700 border-gray-600">
+        <Card key={index} className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle className="text-blue-400">{aggregatedResponse.question}</CardTitle>
+            <CardTitle className="text-black">{aggregatedResponse.question}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {aggregatedResponse.answers.map((answer, answerIndex) => (
-                <div key={answerIndex} className="bg-gray-800 rounded p-3 flex justify-between items-center">
-                  <p className="text-gray-300">{answer.answer}</p>
+                <div key={answerIndex} className="bg-gray-50 rounded p-3 flex justify-between items-center border border-gray-200">
+                  <p className="text-gray-800">{answer.answer}</p>
                   <div className="flex items-center">
                     {answer.rating >= 4 ? (
-                      <ThumbsUp className="h-4 w-4 text-green-400 mr-1" />
+                                            <ThumbsUp className="h-4 w-4 text-green-600 mr-1" />
                     ) : answer.rating <= 2 ? (
-                      <ThumbsDown className="h-4 w-4 text-red-400 mr-1" />
+                      <ThumbsDown className="h-4 w-4 text-red-600 mr-1" />
                     ) : null}
-                    <span className="text-sm font-semibold text-gray-300">{answer.rating}/5</span>
+                    <span className="text-sm font-semibold text-gray-600">{answer.rating}/5</span>
                   </div>
                 </div>
               ))}
