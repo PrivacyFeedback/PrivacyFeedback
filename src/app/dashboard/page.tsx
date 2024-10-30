@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Lock, Shield, UserCheck, Zap, PlusCircle, DollarSign, BarChart2, MessageSquare, Gift, ChevronRight, Activity, Star, ThumbsUp, ThumbsDown, ChevronLeft, ChevronDown, Filter } from "lucide-react"
 
+
+// Type definitions
 interface Service {
   id: number
   name: string
@@ -22,13 +24,65 @@ interface Service {
   rating: number
 }
 
-const mockServices = [
+interface FeedbackResponse {
+  question: string
+  answer: string
+  rating: number
+}
+
+interface Feedback {
+  id: number
+  serviceId: number
+  date: string
+  overallRating: number
+  responses: FeedbackResponse[]
+}
+
+interface Analytics {
+  name: string
+  interactions: number
+  feedbacks: number
+}
+
+interface ServiceFormData {
+  name: string
+  description: string
+  feedbackQuestions: Array<{
+    type: string
+    question: string
+  }>
+}
+
+interface AddServiceFormProps {
+  onSubmit: (data: ServiceFormData) => void
+}
+
+interface ServiceDetailsProps {
+  service: Service
+  feedbacks: Feedback[]
+  onBack: () => void
+  onReward: (feedbackId: number) => void
+}
+
+interface IndividualFeedbackViewProps {
+  feedbacks: Feedback[]
+  onReward: (feedbackId: number) => void
+  currentPage: number
+  totalPages: number
+  setCurrentPage: (page: number) => void
+}
+
+interface AggregatedFeedbackViewProps {
+  feedbacks: Feedback[]
+}
+
+const mockServices: Service[]  = [
   { id: 1, name: 'Service A', interactions: 100, feedbacks: 50, rating: 4.5 },
   { id: 2, name: 'Service B', interactions: 75, feedbacks: 30, rating: 3.8 },
   { id: 3, name: 'Service C', interactions: 120, feedbacks: 60, rating: 4.2 },
 ]
 
-const mockFeedbacks = [
+const mockFeedbacks: Feedback[] = [ 
   {
     id: 1,
     serviceId: 1,
@@ -70,7 +124,7 @@ const mockFeedbacks = [
   },
 ]
 
-const mockAnalytics = [
+const mockAnalytics: Analytics[] = [
   { name: 'Jan', interactions: 65, feedbacks: 40 },
   { name: 'Feb', interactions: 59, feedbacks: 30 },
   { name: 'Mar', interactions: 80, feedbacks: 50 },
@@ -85,10 +139,10 @@ export default function Dashboard() {
   const [isAddingService, setIsAddingService] = useState(false)
   const { toast } = useToast()
 
-  const handleAddService = (serviceData) => {
-    const newService = {
+  const handleAddService = (serviceData: ServiceFormData) => {
+    const newService: Service = {
       id: services.length + 1,
-      ...serviceData,
+      name: serviceData.name,
       interactions: 0,
       feedbacks: 0,
       rating: 0,
@@ -101,7 +155,7 @@ export default function Dashboard() {
     })
   }
 
-  const handleReward = (feedbackId) => {
+  const handleReward = (feedbackId: number) => {
     toast({
       title: "Reward Sent",
       description: `Reward has been sent for feedback ID: ${feedbackId}`,
@@ -208,22 +262,24 @@ export default function Dashboard() {
   )
 }
 
-function AddServiceForm({ onSubmit }) {
+function AddServiceForm({ onSubmit }: AddServiceFormProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [feedbackQuestions, setFeedbackQuestions] = useState([{ type: 'rating', question: '' }])
+  const [feedbackQuestions, setFeedbackQuestions] = useState<Array<{ type: string; question: string }>>([
+    { type: 'rating', question: '' }
+  ])
 
   const handleAddQuestion = () => {
     setFeedbackQuestions([...feedbackQuestions, { type: 'rating', question: '' }])
   }
 
-  const handleQuestionChange = (index, field, value) => {
+  const handleQuestionChange = (index: number, field: 'type' | 'question', value: string) => {
     const updatedQuestions = [...feedbackQuestions]
     updatedQuestions[index][field] = value
     setFeedbackQuestions(updatedQuestions)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit({ name, description, feedbackQuestions })
   }
@@ -273,11 +329,11 @@ function AddServiceForm({ onSubmit }) {
   )
 }
 
-function ServiceDetails({ service, feedbacks, onBack, onReward }) {
+function ServiceDetails({ service, feedbacks, onBack, onReward }: ServiceDetailsProps) {
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortBy, setSortBy] = useState('date')
-  const [filterRating, setFilterRating] = useState('all')
-  const [viewMode, setViewMode] = useState('individual')
+  const [sortBy, setSortBy] = useState<'date' | 'rating'>('date')
+  const [filterRating, setFilterRating] = useState<string>('all')
+  const [viewMode, setViewMode] = useState<'individual' | 'aggregated'>('individual')
   const itemsPerPage = 5
 
   const sortedFeedbacks = [...feedbacks].sort((a, b) => {
@@ -420,8 +476,14 @@ function ServiceDetails({ service, feedbacks, onBack, onReward }) {
   )
 }
 
-function IndividualFeedbackView({ feedbacks, onReward, currentPage, totalPages, setCurrentPage }) {
-  return (
+function IndividualFeedbackView({ 
+  feedbacks, 
+  onReward, 
+  currentPage, 
+  totalPages, 
+  setCurrentPage 
+}: IndividualFeedbackViewProps) {
+    return (
     <div className="space-y-4">
       {feedbacks.map((feedback) => (
         <div key={feedback.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -485,8 +547,7 @@ function IndividualFeedbackView({ feedbacks, onReward, currentPage, totalPages, 
   )
 }
 
-function AggregatedFeedbackView({ feedbacks }) {
-  const aggregatedResponses = feedbacks[0].responses.map(response => ({
+function AggregatedFeedbackView({ feedbacks }: AggregatedFeedbackViewProps) {  const aggregatedResponses = feedbacks[0].responses.map(response => ({
     question: response.question,
     answers: feedbacks.map(feedback => 
       feedback.responses.find(r => r.question === response.question)
