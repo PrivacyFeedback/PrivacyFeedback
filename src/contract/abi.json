@@ -1,0 +1,305 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_serviceId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "_signature",
+				"type": "bytes"
+			}
+		],
+		"name": "registerInteraction",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_metadata",
+				"type": "string"
+			}
+		],
+		"name": "registerService",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "serviceId",
+				"type": "uint256"
+			}
+		],
+		"name": "ServiceRegistered",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_serviceId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "_feedbackFillingSignature",
+				"type": "bytes"
+			},
+			{
+				"internalType": "string",
+				"name": "_feedback",
+				"type": "string"
+			}
+		],
+		"name": "submitFeedback",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_serviceId",
+				"type": "uint256"
+			}
+		],
+		"name": "getFeedbackByService",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_serviceId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_state",
+				"type": "string"
+			}
+		],
+		"name": "getMessageHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_owner",
+				"type": "address"
+			}
+		],
+		"name": "getServicesByOwner",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "serviceId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "metadata",
+						"type": "string"
+					}
+				],
+				"internalType": "struct VerifyInteraction.Service[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerToServices",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "serviceId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "metadata",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_ethSignedMessageHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "bytes",
+				"name": "_signature",
+				"type": "bytes"
+			}
+		],
+		"name": "recoverSigner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "serviceIdToOwner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_serviceId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_state",
+				"type": "string"
+			},
+			{
+				"internalType": "bytes",
+				"name": "_signature",
+				"type": "bytes"
+			}
+		],
+		"name": "verify",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_serviceId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "_feedbackFillingSignature",
+				"type": "bytes"
+			}
+		],
+		"name": "verifyFeedbackFilling",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
