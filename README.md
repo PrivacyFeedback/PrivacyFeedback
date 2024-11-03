@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PrivacyFeedback: Secure, Private, and Verified Feedback System
+
+## Overview
+PrivacyFeedback is a blockchain-based feedback system designed to ensure user privacy while providing companies with authentic insights. Built on the Oasis Network, it allows users to submit feedback anonymously after verifying their interactions with services.
+
+## Features
+- **Privacy-Preserving Feedback**: Users submit feedback without revealing their identities.
+- **On-Chain Verification**: User interactions are recorded on-chain, ensuring data integrity.
+- **Fair Reward Distribution**: Users are rewarded fairly for their contributions, regardless of feedback content.
 
 ## Getting Started
 
-First, run the development server:
+### Installation
+To deploy PrivacyFeedback, follow these steps:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PrivacyFeedback/PrivacyFeedback.git
+   cd PrivacyFeedback
+   ```
 
+2. Install dependencies:
+   ```bash
+   nvm use 20
+   npm install
+   ```
+
+3. Configure your environment:
+   - Set up your `.env` file with the necessary API keys and database configurations similar to `.env.example`.
+
+### Running the Application
+To start the application, run:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Documentation
+For detailed usage and SDK documentation, refer to the [SDK Docs](https://privacy-feedback.vercel.app/).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
