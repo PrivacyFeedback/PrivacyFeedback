@@ -1,7 +1,4 @@
-// @ts-nocheck
-
-"use client";
-
+'use client'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -101,15 +98,19 @@ export default function Dashboard() {
       convertStringToUint32(ipfsUrl, obj)
 
       await toast.promise(
-        contract.registerService(BigInt(obj.part1), BigInt(obj.part2)),
+        (async () => {
+          const tx = await contract.registerService(BigInt(obj.part1), BigInt(obj.part2));
+          const receipt = await tx.wait();
+          console.log(receipt);
+          return receipt;
+        })(),
         {
           loading: 'Registering service on the blockchain...',
           success: 'Service registered successfully',
           error: 'Failed to register service',
         }
-      )
+      );
 
-      setServices([])
       await fetchServices()
     } catch (error) {
       toast.error("Error adding service: " + error.message)
@@ -192,6 +193,32 @@ export default function Dashboard() {
     }
   }
 
+  const rewardAllFeedbacks = async (serviceId) => {
+    try {
+      const contract = await getContract()
+      const totalFeedbacks = await contract.getTotalFeedbacks(BigInt(serviceId));
+      if (!contract) return
+      await toast.promise(
+        (async () => {
+          const rewardAmount = ethers.parseEther("0.1");
+          const tx = await contract.rewardUsersForFeedback(BigInt(serviceId), BigInt(rewardAmount), {
+            value: totalFeedbacks*rewardAmount,
+          })
+          const receipt = await tx.wait();
+          console.log(receipt);
+          return receipt;
+        })(),
+        {
+          loading: 'Rewarding feedbacks on the blockchain...',
+          success: 'Feedbacks rewarded successfully',
+          error: 'Failed to reward feedbacks',
+        }
+      );
+    } catch (error) {
+      toast.error("Failed to reward feedbacks: " + error.message)
+    }
+  }
+
   useEffect(() => {
     if (isConnected) {
       toast.success("Wallet connected")
@@ -226,6 +253,9 @@ export default function Dashboard() {
               service={selectedService}
               feedbacks={feedbacks}
               onBack={() => setSelectedService(null)}
+              onRewardAll={async () => {
+                rewardAllFeedbacks(selectedService.id)
+              }}
             />
           )}
         </div>
@@ -252,34 +282,47 @@ function ServicesList({ services, onAddService, onViewDetails }) {
           <PlusCircle className="mr-2 h-4 w-4" /> Add Service
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((service) => (
-          <Card key={service.id} className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-black">{service.id}: {service.name}</CardTitle>
-              <CardDescription className="text-gray-600">
-                {service.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between text-gray-600 mb-4">
-                <div className="flex items-center">
-                  <Activity className="h-4 w-4 mr-2 text-green-600" />
-                  <span>{service.interactions} Interactions</span>
+      {services.length === 0 ? (
+        <Card className="bg-white border-gray-200">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <MessageSquare className="h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-xl font-semibold text-gray-600 mb-2">No services found</p>
+            <p className="text-gray-500 mb-4">Get started by adding your first service</p>
+            <Button onClick={onAddService} className="bg-black hover:bg-gray-800 text-white">
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Service
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((service) => (
+            <Card key={service.id} className="bg-white border-gray-200 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-black">{service.id}: {service.name}</CardTitle>
+                <CardDescription className="text-gray-600">
+                  {service.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between text-gray-600 mb-4">
+                  <div className="flex items-center">
+                    <Activity className="h-4 w-4 mr-2 text-green-600" />
+                    <span>{service.interactions} Interactions</span>
+                  </div>
+                  <div className="flex items-center">
+                    <MessageSquare className="h-4 w-4 mr-2 text-yellow-600" />
+                    <span>{service.feedbacks} Feedbacks</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <MessageSquare className="h-4 w-4 mr-2 text-yellow-600" />
-                  <span>{service.feedbacks} Feedbacks</span>
-                </div>
-              </div>
-              <Button onClick={() => onViewDetails(service)} variant="outline" className="w-full text-black border-black hover:bg-black hover:text-white">
-                View Details <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <ServicesAnalytics services={services} />
+                <Button onClick={() => onViewDetails(service)} variant="outline" className="w-full text-black border-black hover:bg-black hover:text-white">
+                  View Details <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {services.length > 0 && <ServicesAnalytics services={services} />}
     </div>
   )
 }
@@ -315,7 +358,7 @@ function ServicesAnalytics({ services }) {
   )
 }
 
-function ServiceDetails({ service, feedbacks, onBack }) {
+function ServiceDetails({ service, feedbacks, onBack, onRewardAll }) {
   const [sortBy, setSortBy] = useState<'rating'>('rating')
   const [filterRating, setFilterRating] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'individual' | 'aggregated'>('individual')
@@ -329,15 +372,23 @@ function ServiceDetails({ service, feedbacks, onBack }) {
     return feedback.overallRating === parseInt(filterRating)
   })
 
-  const averageRating = feedbacks.reduce((sum, feedback) => sum + feedback.overallRating, 0) / feedbacks.length
+  const averageRating = 
+    feedbacks.length > 0
+      ? feedbacks.reduce((sum, feedback) => sum + feedback.overallRating, 0) / feedbacks.length
+      : 0
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-semibold text-black">{service.name}</h2>
-        <Button onClick={onBack} variant="outline" className="text-black border-black hover:bg-black hover:text-white">
-          <ChevronLeft className="mr-2 h-4 w-4" /> Back to Services
-        </Button>
+        <div className="space-x-2">
+          <Button onClick={onRewardAll} className="bg-black hover:bg-gray-800 text-white">
+            <Gift className="mr-2 h-4 w-4" /> Reward All Feedbacks
+          </Button>
+          <Button onClick={onBack} variant="outline" className="text-black border-black hover:bg-black hover:text-white">
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Services
+          </Button>
+        </div>
       </div>
       <Card className="bg-white border-gray-200">
         <CardHeader>

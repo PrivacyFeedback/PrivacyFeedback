@@ -43,10 +43,12 @@ const domain = {
 };
 
 const types = {
-  Interaction: [
+  Feedback: [
     { name: "user", type: "address" },
     { name: "serviceId", type: "uint256" },
-    { name: "state", type: "uint8" },
+    { name: "timestamp", type: "uint256" },
+    { name: "feedback_p1", type: "uint256" },
+    { name: "feedback_p2", type: "uint256" },
   ],
 };
 
@@ -147,19 +149,28 @@ export default function MagicLinkFeedback() {
     );
   };
 
-  const signMessage = async (ipfsUrl) => {
+  interface FeedbackPageProps {
+    service: string;
+    user: string;
+  }
+
+  const signMessage = async (ipfsUrl: string, props: FeedbackPageProps) => {
     let obj = { part1: "", part2: "" };
     convertStringToUint32(ipfsUrl, obj);
-    
+    const serviceId = BigInt(params.service);
+
     try {
       const ethersProvider = new ethers.BrowserProvider(window.ethereum);
       const signer = await ethersProvider.getSigner();
       const contract = await getContract();
+      const timestamp = Math.floor(Date.now() / 1000);
 
-      const interaction = {
+      const feedback = {
         user: signer.address,
-        serviceId: params.service,
-        state: 2, // FEEDBACK_FILLING
+        serviceId: serviceId,
+        timestamp: timestamp,
+        feedback_p1: obj.part1,
+        feedback_p2: obj.part2,
       };
 
       return toast.promise(
@@ -167,14 +178,15 @@ export default function MagicLinkFeedback() {
           const signature = await signer.signTypedData(
             domain,
             types,
-            interaction
+            feedback
           );
           const splitSig = ethers.Signature.from(signature);
           const tx = await contract.submitFeedback(
-            BigInt(params.service),
+            BigInt(serviceId),
             splitSig.v,
             splitSig.r,
             splitSig.s,
+            BigInt(timestamp),
             BigInt(obj.part1),
             BigInt(obj.part2)
           );
