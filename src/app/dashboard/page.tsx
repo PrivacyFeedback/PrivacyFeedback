@@ -172,6 +172,7 @@ export default function Dashboard() {
       const ethersProvider = new ethers.BrowserProvider(window.ethereum);
       const signer = await ethersProvider.getSigner()
       const contract = new ethers.Contract(contractAddress.address, contractABI, signer);
+      console.log(signer.address);
       toast.success("Contract fetched successfully")
       return contract;
     } catch (error) {
@@ -180,6 +181,7 @@ export default function Dashboard() {
   }
 
   const uploadServiceToIPFS = (serviceData: ServiceFormData): Promise<string> => {
+    console.log(serviceData);
     return fetch("/api/service", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
@@ -188,11 +190,12 @@ export default function Dashboard() {
     .then(response => response.json());
   };
   
-  const addService = (serviceData: ServiceFormData, services: Service[], setServices: (services: Service[]) => void) => {
+  const addService = (serviceData: ServiceFormData, services: Service[], setServices: (services: Service[]) => void) => {    
     const promise = uploadServiceToIPFS(serviceData)
       .then(ipfsUrl => {
         let obj = { part1: "", part2: "" };
         convertStringToUint32(ipfsUrl, obj);
+        console.log(obj.part1, obj.part2);
         return getContract().then(contract => 
           contract.registerService(BigInt(obj.part1), BigInt(obj.part2))
         );
@@ -200,14 +203,8 @@ export default function Dashboard() {
       .then(tx => tx.wait())
       .then(receipt => {
         console.log(receipt);
-        const newService: Service = {
-          id: services.length + 1,
-          name: serviceData.name,
-          description: serviceData.description,
-          interactions: 0,
-          feedbacks: 0,
-        }
-        setServices([...services, newService]);
+        setServices([])
+        fetchServices()
       });
   
     toast.promise(promise, {
@@ -234,7 +231,7 @@ export default function Dashboard() {
       const contract = await getContract();
       const serviceIds = await contract.getServiceIdsByOwner(address);
       const servicesTemp = await Promise.all(serviceIds.map(async (serviceId) => {
-        const serviceMetaData = await contract.getServiceMetadataByServiceId(BigInt(serviceId));
+        const serviceMetaData = await contract.getServiceMetadata(BigInt(serviceId));
         const IpfsHash = decodeUint32ToString(BigInt(serviceMetaData[0]), BigInt(serviceMetaData[1]));
         const ipfsUrl = await pinata.gateways.convert(IpfsHash);
         const response = await fetch(ipfsUrl);
