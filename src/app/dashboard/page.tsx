@@ -21,6 +21,7 @@ import contractAddress from "@/contract/address.json"
 import { toast } from 'react-hot-toast'
 import { pinata } from "@/utils/config"
 import { decodeUint32ToString, convertStringToUint32 } from "@/utils/ipfs"
+import * as sapphire from '@oasisprotocol/sapphire-paratime';
 
 interface Service {
   id: number
@@ -68,7 +69,17 @@ export default function Dashboard() {
     try {
       const ethersProvider = new ethers.BrowserProvider(window.ethereum)
       const signer = await ethersProvider.getSigner()
-      return new ethers.Contract(contractAddress.address, contractABI, signer)
+      const contractRead = new ethers.Contract(
+        contractAddress.address,
+        contractABI,
+        ethersProvider
+      );
+      const contractWrite = new ethers.Contract(
+        contractAddress.address,
+        contractABI,
+        signer
+      )
+      return {contractRead, contractWrite};
     } catch (error) {
       toast.error("Failed to fetch contract: " + error.message)
       return null
@@ -93,15 +104,15 @@ export default function Dashboard() {
   const addService = async (serviceData: ServiceFormData) => {
     try {
       const ipfsUrl = await uploadServiceToIPFS(serviceData)
-      const contract = await getContract()
-      if (!contract) return
+      const {contractRead, contractWrite} = await getContract();
+      if (!contractRead || !contractWrite) return
 
       let obj = { part1: "", part2: "" }
       convertStringToUint32(ipfsUrl, obj)
 
       await toast.promise(
         (async () => {
-          const tx = await contract.registerService(BigInt(obj.part1), BigInt(obj.part2));
+          const tx = await contractWrite.registerService(BigInt(obj.part1), BigInt(obj.part2));
           const receipt = await tx.wait();
           console.log(receipt);
           return receipt;
@@ -126,18 +137,18 @@ export default function Dashboard() {
 
   const fetchServices = async () => {
     try {
-      const contract = await getContract()
-      if (!contract) return
+      const {contractRead, contractWrite} = await getContract();
+      if (!contractRead || !contractWrite) return
 
-      const serviceIds = await contract.getServiceIdsByOwner(address)
+      const serviceIds = await contractRead.getServiceIdsByOwner(address)
       const servicesPromises = serviceIds.map(async (serviceId) => {
-        const serviceMetaData = await contract.getServiceMetadata(BigInt(serviceId))
+        const serviceMetaData = await contractRead.getServiceMetadata(BigInt(serviceId))
         const IpfsHash = decodeUint32ToString(BigInt(serviceMetaData[0]), BigInt(serviceMetaData[1]))
         const ipfsUrl = await pinata.gateways.convert(IpfsHash)
         const response = await fetch(ipfsUrl)
         const data = await response.json()
-        const feedbacks = await contract.getTotalFeedbacks(BigInt(serviceId))
-        const interactions = await contract.getTotalInteractions(BigInt(serviceId))
+        const feedbacks = await contractRead.getTotalFeedbacks(BigInt(serviceId))
+        const interactions = await contractRead.getTotalInteractions(BigInt(serviceId))
         
         return {
           id: serviceId.toString(),
@@ -167,10 +178,10 @@ export default function Dashboard() {
   const viewServiceDetails = async (service: Service) => {
     setSelectedService(service)
     try {
-      const contract = await getContract()
-      if (!contract) return
+      const {contractRead, contractWrite} = await getContract();
+      if (!contractRead || !contractWrite) return
 
-      const feedbacksData = await contract.getAllFeedbacks(BigInt(service.id))
+      const feedbacksData = await contractWrite.getAllFeedbacks(BigInt(service.id))
       
       const feedbacksPromises = Array.from({ length: feedbacksData.length / 2 }, (_, i) => i * 2).map(async (index) => {
         const feedbackMetaData1 = feedbacksData[index]
@@ -197,13 +208,13 @@ export default function Dashboard() {
 
   const rewardAllFeedbacks = async (serviceId) => {
     try {
-      const contract = await getContract()
-      const totalFeedbacks = await contract.getTotalFeedbacks(BigInt(serviceId));
-      if (!contract) return
+      const {contractRead, contractWrite} = await getContract();
+      const totalFeedbacks = await contractRead.getTotalFeedbacks(BigInt(serviceId));
+      if (!contractRead || !contractWrite) return
       await toast.promise(
         (async () => {
           const rewardAmount = ethers.parseEther("0.1");
-          const tx = await contract.rewardUsersForFeedback(BigInt(serviceId), BigInt(rewardAmount), {
+          const tx = await contractWrite.rewardUsersForFeedback(BigInt(serviceId), BigInt(rewardAmount), {
             value: totalFeedbacks*rewardAmount,
           })
           const receipt = await tx.wait();
@@ -224,6 +235,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (isConnected) {
       toast.success("Wallet connected")
+      window.ethereum = sapphire.wrap(window.ethereum);
       fetchServices()
     } else {
       toast.error("Wallet not connected")

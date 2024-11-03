@@ -28,6 +28,7 @@ import contractABI from "@/contract/abi.json";
 import contractAddress from "@/contract/address.json";
 import { pinata } from "@/utils/config";
 import { decodeUint32ToString, convertStringToUint32 } from "@/utils/ipfs";
+import * as sapphire from '@oasisprotocol/sapphire-paratime';
 
 interface ServiceData {
   name: string;
@@ -64,6 +65,7 @@ export default function MagicLinkFeedback() {
 
   useEffect(() => {
     if (isConnected) {
+      window.ethereum = sapphire.wrap(window.ethereum);
       verifyUser();
     }
   }, [isConnected]);
@@ -78,12 +80,17 @@ export default function MagicLinkFeedback() {
     try {
       const ethersProvider = new ethers.BrowserProvider(window.ethereum);
       const signer = await ethersProvider.getSigner();
-      const contract = new ethers.Contract(
+      const contractRead = new ethers.Contract(
+        contractAddress.address,
+        contractABI,
+        ethersProvider
+      );
+      const contractWrite = new ethers.Contract(
         contractAddress.address,
         contractABI,
         signer
-      );
-      return contract;
+      )
+      return {contractRead, contractWrite};
     } catch (error) {
       toast.error("Failed to fetch contract: " + error.message);
       throw error;
@@ -92,9 +99,9 @@ export default function MagicLinkFeedback() {
 
   const fetchService = async () => {
     try {
-      const contract = await getContract();
+      const {contractRead, contractWrite} = await getContract();
       const serviceId = BigInt(params.service);
-      const serviceMetaData = await contract.getServiceMetadata(serviceId);
+      const serviceMetaData = await contractRead.getServiceMetadata(serviceId);
       const IpfsHash = decodeUint32ToString(
         BigInt(serviceMetaData[0]),
         BigInt(serviceMetaData[1])
@@ -162,7 +169,7 @@ export default function MagicLinkFeedback() {
     try {
       const ethersProvider = new ethers.BrowserProvider(window.ethereum);
       const signer = await ethersProvider.getSigner();
-      const contract = await getContract();
+      const {contractRead, contractWrite} = await getContract();
       const timestamp = Math.floor(Date.now() / 1000);
 
       const feedback = {
@@ -181,7 +188,7 @@ export default function MagicLinkFeedback() {
             feedback
           );
           const splitSig = ethers.Signature.from(signature);
-          const tx = await contract.submitFeedback(
+          const tx = await contractWrite.submitFeedback(
             BigInt(serviceId),
             splitSig.v,
             splitSig.r,
